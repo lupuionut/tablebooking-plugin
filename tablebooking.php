@@ -1,5 +1,9 @@
 <?php
 
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Layout\LayoutHelper;
+
 defined('_JEXEC') or die;
 
 class PlgContentTablebooking extends JPlugin
@@ -19,17 +23,58 @@ class PlgContentTablebooking extends JPlugin
             return true;
         }
 
-        $regex = '#\{\{tablebooking(?=( id=([0-9]{1,})\}\})|\}\})#';
-        preg_match($regex, $row->text, $matches);
-        $found = count($matches);
-        $restaurant_id = 0;
+        // if component is not installed or disabled do not continue
+        if (!$this->componentInstalled()) {
+            return true;
+        }
 
-        if ($found > 0) {
-            if ($found == 3) {
-                $restaurant_id = $matches[2];
+        $ids = $this->extractIds($row->text);
+
+        // generate a booking form for each found instance on the page
+        foreach ($ids as $key => $id) {
+            if ($id == -1) {
+                $replacement = $this->generateForm($key, 0);
+                $row->text = preg_replace('#{{tablebooking}}#', $replacement, $row->text, 1);
+            } elseif ($id == 0) {
+                $replacement = $this->generateForm($key, 0);
+                $row->text = preg_replace('#{{tablebooking id=0}}#', $replacement, $row->text, 1);
+            } else {
+                $replacement = $this->generateForm($key, $id);
+                $row->text = preg_replace('#{{tablebooking id=[0-9]{1,}}}#', $replacement, $row->text, 1);
             }
         }
 
         return true;
+    }
+
+    // returns an array with all restaurants id for which we should generate
+    // the booking form
+    protected function extractIds($content) {
+
+        $ids = array();
+        $regex = '#\{\{tablebooking(?=( id=([0-9]{1,})\}\})|\}\})#';
+        preg_match_all($regex, $content, $matches);
+        if (count($matches) == 3) {
+            return array_map(function($el){return $el != '' ? $el : -1;}, $matches[2]);
+        }
+        return $ids;
+    }
+
+    // returns boolean, true if TableBooking component is installed and activated
+    // false if the component is not installed or is not activated
+    protected function componentInstalled() {
+
+        if (ComponentHelper::getComponent('com_tablebooking')->id) {
+            return true;
+        }
+        return false;
+    }
+
+
+    protected function generateForm($key, $id) {
+
+        Factory::getDocument()->addScript('https://unpkg.com/vue@3/dist/vue.global.js');
+        return LayoutHelper::render(
+            'form', array('key' => $key, 'id' => $id), __DIR__ . '/layouts');
     }
 }
