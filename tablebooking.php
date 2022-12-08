@@ -2,7 +2,7 @@
 
 defined('_JEXEC') or die;
 
-class PlgContentTablabooking extends JPlugin
+class PlgContentTablebooking extends JPlugin
 {
     /**
     * @param   string   $context  The context of the content being passed to the plugin.
@@ -18,6 +18,18 @@ class PlgContentTablabooking extends JPlugin
         if ($context === 'com_finder.indexer') {
             return true;
         }
-    }
 
+        $regex = '#\{\{tablebooking(?=( id=([0-9]{1,})\}\})|\}\})#';
+        preg_match($regex, $row->text, $matches);
+        $found = count($matches);
+        $restaurant_id = 0;
+
+        if ($found > 0) {
+            if ($found == 3) {
+                $restaurant_id = $matches[2];
+            }
+        }
+
+        return true;
+    }
 }
