@@ -8,6 +8,9 @@ defined('_JEXEC') or die;
 
 class PlgContentTablebooking extends JPlugin
 {
+    protected $autoloadLanguage = true;
+    protected static $isNewInstance = true;
+
     /**
     * @param   string   $context  The context of the content being passed to the plugin.
     * @param   mixed    &$row     An object with a "text" property or the string to be cloaked.
@@ -47,6 +50,7 @@ class PlgContentTablebooking extends JPlugin
         return true;
     }
 
+
     // returns an array with all restaurants id for which we should generate
     // the booking form
     protected function extractIds($content) {
@@ -59,6 +63,7 @@ class PlgContentTablebooking extends JPlugin
         }
         return $ids;
     }
+
 
     // returns boolean, true if TableBooking component is installed and activated
     // false if the component is not installed or is not activated
@@ -74,7 +79,9 @@ class PlgContentTablebooking extends JPlugin
     protected function generateForm($key, $id) {
 
         Factory::getDocument()->addScript('https://unpkg.com/vue@3/dist/vue.global.js');
+        $isNew = self::$isNewInstance;
+        self::$isNewInstance = false;
         return LayoutHelper::render(
-            'form', array('key' => $key, 'id' => $id), __DIR__ . '/layouts');
+            'form', array('key' => $key, 'id' => $id, 'isNew' => $isNew), __DIR__ . '/layouts');
     }
 }
