@@ -79,6 +79,7 @@ class PlgContentTablebooking extends JPlugin
     protected function generateForm($key, $id) {
 
         Factory::getDocument()->addScript('https://unpkg.com/vue@3/dist/vue.global.js');
+        Factory::getDocument()->addScript('components/com_tablebooking/assets/js/calendar.js');
         $isNew = self::$isNewInstance;
         self::$isNewInstance = false;
         return LayoutHelper::render(
