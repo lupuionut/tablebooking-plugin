@@ -31,8 +31,12 @@ const TbSearchForm = {
             },
             form: {
                 restaurants: [],
-                date: ''
-            }
+                date: '',
+                starthour: 0,
+                endhour: 0,
+                places: 0
+            },
+            restrictedDays: [],
         }
     },
     methods: {
@@ -65,6 +69,54 @@ const TbSearchForm = {
                     }
                 }).join('');
             }
+        },
+        disabledDates(month = -1, year = -1) {
+            let disabled = [];
+            let restrictedWeekDays = [];
+
+            const pattern = RegExp(/[0-9]{4}-[0-9]{2}-[0-9]{2}/);
+            if (this.restaurant.params.restricted) {
+                disabled = this.restaurant.params.restricted
+                            .filter(e => {return e.match(pattern) != null})
+                restrictedWeekDays = this.restaurant.params.restricted
+                    .filter(e => {return Number(e) < 10 })
+                    .map(e => {return Number(e)})
+            }
+
+            if (restrictedWeekDays) {
+                const m = month == -1 ? new Date().getMonth() + 1 : month + 1;
+                const y = year == -1 ? new Date().getFullYear() : year;
+                for (let i=1; i<=31; i++) {
+                    const d = y + '-' + m + '-' + i;
+                    const date = new Date(d);
+                    if (date.toString() != 'Invalid Date') {
+                        const wd = date.getDay();
+                        // sunday
+                        if (wd == 0 && restrictedWeekDays.indexOf(7) !== -1) {
+                            if (this.restaurant.params.allowed.indexOf(d) === -1) {
+                                disabled.push(d);
+                            }
+                        } else if (restrictedWeekDays.indexOf(wd) !== -1) {
+                            if (this.restaurant.params.allowed.indexOf(d) === -1) {
+                                disabled.push(d);
+                            }
+                        }
+                    }
+                }
+            }
+            return disabled;
+        },
+        calendarOpen() {
+            this.restrictedDays = this.disabledDates();
+        },
+        calendarUpdateMonthYear({ instance, month, year }) {
+            this.restrictedDays = this.disabledDates(month, year);
+        },
+        calendarWeekSart() {
+            if (this.restaurant.params.startcal) {
+                return this.restaurant.params.startcal;
+            }
+            return 1;
         }
     },
     mounted() {
@@ -81,37 +133,62 @@ const TbSearchForm = {
         Datepicker: VueDatePicker
     },
     template: `
-        <div class="form-group">
-            <select
-                v-if="this.rid == 0"
-                v-model="this.restaurant.id"
-                @change="this.loadRestaurant(this.restaurant.id)">
-                <option value="0">
-                    <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_SELECT_RESTAURANT', true);?>
-                </option>
-                <option v-for="restaurant in this.form.restaurants"
-                    :value="restaurant.value"
-                    :key="restaurant.value">{{ restaurant.name }}</option>
-            </select>
+        <div class="form-group tb-plugin-form">
+            <div class="tb-plugin-form-row">
+                <select
+                    v-if="this.rid == 0"
+                    v-model="this.restaurant.id"
+                    @change="this.loadRestaurant(this.restaurant.id)">
+                    <option value="0">
+                        <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_SELECT_RESTAURANT', true);?>
+                    </option>
+                    <option v-for="restaurant in this.form.restaurants"
+                        :value="restaurant.value"
+                        :key="restaurant.value">{{ restaurant.name }}</option>
+                </select>
+            </div>
 
-            <datepicker
-                v-if="this.restaurant.id != 0"
-                v-model="this.form.date"
-                :enable-time-picker="false"
-                auto-apply
-                :close-on-auto-apply="true"
-                :format="this.formatDate()"></datepicker>
+            <div class="tb-plugin-form-row">
+                <datepicker
+                    v-if="this.restaurant.id != 0"
+                    v-model="this.form.date"
+                    :enable-time-picker="false"
+                    auto-apply
+                    :close-on-auto-apply="true"
+                    :min-date="new Date()"
+                    :disabled-dates="this.restrictedDays"
+                    @open="this.calendarOpen"
+                    @updateMonthYear="this.calendarUpdateMonthYear"
+                    :format="this.formatDate()"
+                    :week-start="this.calendarWeekSart()"></datepicker>
+            </div>
 
-            <input type="text"
-                name="tbfrom"
-                id="tbfrom" />
+            <div class="tb-plugin-form-row-1-3">
+                <select
+                    v-if="this.restaurant.id != 0"
+                    v-model="this.form.starthour">
+                </select>
+            </div>
 
-            <input type="text"
-                name="tbto"
-                id="tbto" />
+            <div class="tb-plugin-form-row-1-3">
+                <select
+                    v-if="this.restaurant.id != 0"
+                    v-model="this.form.endhour">
+                </select>
+            </div>
 
-            <button type="button" @click="submit">
-                <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_SEARCH', true);?></button>
+            <div class="tb-plugin-form-row-1-3">
+                <select
+                    v-if="this.restaurant.id != 0"
+                    v-model="this.form.places">
+                </select>
+            </div>
+
+            <div class="tb-plugin-form-row">
+                <button type="button"
+                    @click="submit">
+                    <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_SEARCH', true);?></button>
+            </div>
         </div>
     `
 };
