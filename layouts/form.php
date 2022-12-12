@@ -22,15 +22,6 @@ $restaurant_id = $displayData['id'];
 const JoomlaToken = '<?php echo Session::getFormToken();?>';
 const JoomlaUri = '<?php echo Uri::root();?>';
 
-// keep track of rendered calendars
-let RenderedCalendars = [];
-const TbNewCalendar = (key, r) => {
-    restaurant = JSON.parse(r);
-    if (RenderedCalendars[key] == undefined) {
-
-    }
-};
-
 const TbSearchForm = {
     data() {
         return {
@@ -40,13 +31,13 @@ const TbSearchForm = {
             },
             form: {
                 restaurants: [],
-
+                date: ''
             }
         }
     },
     methods: {
         submit() {
-            TbNewCalendar(this.rkey, JSON.stringify(this.restaurant));
+            console.log(this.restaurant.params.dateformat);
         },
         loadRestaurant(id) {
             fetch(
@@ -55,6 +46,26 @@ const TbSearchForm = {
             ).then(r => r.json())
             .then(r => { this.restaurant = r })
         },
+        formatDate() {
+            const replacements = {
+                'Y': 'yyyy',
+                'm': 'MM',
+                'd': 'dd',
+                'M': 'MMM',
+                'F': 'MMMM',
+                'j': 'd',
+                'n': 'L'
+            }
+            if (this.restaurant.params.dateformat) {
+                return this.restaurant.params.dateformat.split('').map(c => {
+                    if (Object.keys(replacements).indexOf(c) !== -1) {
+                        return replacements[c];
+                    } else {
+                        return c;
+                    }
+                }).join('');
+            }
+        }
     },
     mounted() {
         if (this.restaurant.id == 0) {
@@ -66,9 +77,13 @@ const TbSearchForm = {
         }
     },
     props: ["rid", "rkey"],
+    components: {
+        Datepicker: VueDatePicker
+    },
     template: `
         <div class="form-group">
-            <select v-if="this.rid == 0"
+            <select
+                v-if="this.rid == 0"
                 v-model="this.restaurant.id"
                 @change="this.loadRestaurant(this.restaurant.id)">
                 <option value="0">
@@ -79,9 +94,13 @@ const TbSearchForm = {
                     :key="restaurant.value">{{ restaurant.name }}</option>
             </select>
 
-            <input type="text"
-                name="tbcalendar"
-                id="tbcalendar" />
+            <datepicker
+                v-if="this.restaurant.id != 0"
+                v-model="this.form.date"
+                :enable-time-picker="false"
+                auto-apply
+                :close-on-auto-apply="true"
+                :format="this.formatDate()"></datepicker>
 
             <input type="text"
                 name="tbfrom"
