@@ -1,0 +1,51 @@
+.bookingForm .form-group.tb-plugin-form{
+    display:flex;
+    flex-direction: column;
+}
+.bookingForm .tb-plugin-form-row{
+    display: flex;
+    flex-direction: row;
+    margin-bottom:5px;
+}
+.bookingForm .tb-plugin-form-row select, .tb-plugin-form-row input[type="text"] {
+    width: 90%;
+    padding: 6px 12px;
+    line-height: 1.5rem;
+    height: auto;
+    font-size: 1rem;
+    margin: 0;
+}
+.bookingForm .row-inline {
+    flex: fit-content;
+    display: flex;
+    margin:0px 2px;
+}
+.bookingForm button {
+    background: #eeefff;
+    color:#313942;
+    border: 1px solid #eee;
+    padding: 6px 12px;
+    line-height: 1.5rem;
+    border-radius: 5px;
+    font-size:1rem;
+}
+.bookingForm button:hover{
+    background: #6c757d;
+    color:#fff;
+}
+@media (max-width: 768px) {
+    .bookingForm .row-inline {
+        margin:5px 0px;
+    }
+    .bookingForm .tb-plugin-form-row{
+        flex-direction: column;
+    }
+    .bookingForm .tb-plugin-form-row select,
+    .tb-plugin-form-row input[type="text"],
+    .bookingForm button {
+        width: 100%;
+    }
+    .bookingForm button {
+        line-height: 2rem;
+    }
+}

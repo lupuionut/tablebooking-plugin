@@ -157,7 +157,7 @@ const TbSearchForm = {
         Datepicker: VueDatePicker
     },
     template: `
-        <div class="form-group tb-plugin-form">
+        <div class="form-group tb-plugin-form first-step">
             <div class="tb-plugin-form-row">
                 <select
                     v-if="this.rid == 0"
@@ -186,43 +186,40 @@ const TbSearchForm = {
                     :disabled-dates="this.restrictedDays"
                     :format="this.formatDate()"
                     :week-start="this.calendarWeekSart()"></datepicker>
-            </div>
 
-            <div class="tb-plugin-form-row-1-3">
-                <select
-                    v-if="this.restaurant.id != 0"
-                    v-model="this.form.starthour">
-                    <option value="0">
-                        <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_FROM_HOUR', false);?>
-                    </option>
-                    <option
-                        v-for="item in this.restaurant.hours"
-                        :key="item.key">{{item.value}}</option>
-                </select>
-            </div>
+                <div class="row-inline" v-if="this.restaurant.id != 0">
+                    <select
+                        v-model="this.form.starthour">
+                        <option value="0">
+                            <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_FROM_HOUR', false);?>
+                        </option>
+                        <option
+                            v-for="item in this.restaurant.hours"
+                            :key="item.key">{{item.value}}</option>
+                    </select>
+                </div>
 
-            <div class="tb-plugin-form-row-1-3">
-                <select
-                    v-if="this.restaurant.id != 0 && Number(this.restaurant.params.booking_length) == 0"
-                    v-model="this.form.endhour">
-                    <option value="0">
-                        <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_TO_HOUR', false);?>
-                    </option>
-                    <option
-                        v-for="item in this.restaurant.hours"
-                        :key="item.key">{{item.value}}</option>
-                </select>
-            </div>
+                <div class="row-inline" v-if="this.restaurant.id != 0 && Number(this.restaurant.params.booking_length) == 0">
+                    <select
+                        v-model="this.form.endhour">
+                        <option value="0">
+                            <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_TO_HOUR', false);?>
+                        </option>
+                        <option
+                            v-for="item in this.restaurant.hours"
+                            :key="item.key">{{item.value}}</option>
+                    </select>
+                </div>
 
-            <div class="tb-plugin-form-row-1-3">
-                <input
-                    type="text"
-                    placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_NUMBER_PERSONS', false);?>"
-                    v-if="this.restaurant.id != 0"
-                    v-model="this.form.places" />
-            </div>
+                <div class="row-inline" v-if="this.restaurant.id != 0">
+                    <input
+                        type="text"
+                        placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_NUMBER_PERSONS', false);?>"
+                        v-if="this.restaurant.id != 0"
+                        v-model="this.form.places" />
+                </div>
 
-            <div class="tb-plugin-form-row">
+                <div class="row-inline">
                 <button type="button"
                     @click="submit">
                     <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_SEARCH', true);?></button>

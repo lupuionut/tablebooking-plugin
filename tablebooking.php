@@ -3,6 +3,7 @@
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\CMS\Uri\Uri;
 
 defined('_JEXEC') or die;
 
@@ -81,6 +82,7 @@ class PlgContentTablebooking extends JPlugin
         Factory::getDocument()->addScript('https://unpkg.com/vue@3/dist/vue.global.js');
         Factory::getDocument()->addScript('https://unpkg.com/@vuepic/vue-datepicker@latest');
         Factory::getDocument()->addStyleSheet('https://unpkg.com/@vuepic/vue-datepicker@latest/dist/main.css"');
+        Factory::getDocument()->addStyleSheet(Uri::root() . 'plugins/content/tablebooking/tablebooking.css');
         $isNew = self::$isNewInstance;
         self::$isNewInstance = false;
         return LayoutHelper::render(
