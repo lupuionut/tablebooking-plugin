@@ -35,14 +35,41 @@ const TbSearchForm = {
                 date: '',
                 starthour: '',
                 endhour: '',
-                places: 0
+                places: 0,
+                error: ''
             },
             restrictedDays: [],
         }
     },
     methods: {
-        submit() {
-            console.log(this.restaurant.params.dateformat);
+        submitForm() {
+            this.form.error = "";
+            if (Number(this.restaurant.id) == 0) {
+                this.form.error =  '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_RESTAURANT_SELECTED', false);?>';
+                return;
+            }
+            if (!this.form.date) {
+                this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_DATE_SELECTED', false);?>';
+                return;
+            }
+            if (!this.form.starthour) {
+                this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_START_TIME_SELECTED', false);?>';
+                return;
+            }
+            if (!this.restaurant.params.booking_length && !this.form.endhour) {
+                this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_END_TIME_SELECTED', false);?>';
+                return;
+            } else {
+                if (this.restaurant.params.booking_length) {
+                    this.form.endhour = this.form.starthour + this.restaurant.params.booking_length;
+                }
+            }
+            if (!this.form.places) {
+                this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_PLACES_SELECTED', false);?>';
+                return;
+            }
+
+
         },
         loadRestaurant(id) {
             fetch(
@@ -158,6 +185,10 @@ const TbSearchForm = {
     },
     template: `
         <div class="form-group tb-plugin-form first-step">
+            <div class="tb-plugin-form-row tb-plugin-error" v-if="this.form.error">
+                <span class="tb-close" @click="this.form.error = ''">X</span>
+                {{form.error}}
+            </div>
             <div class="tb-plugin-form-row">
                 <select
                     v-if="this.rid == 0"
@@ -220,9 +251,10 @@ const TbSearchForm = {
                 </div>
 
                 <div class="row-inline">
-                <button type="button"
-                    @click="submit">
-                    <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_SEARCH', true);?></button>
+                    <button type="button"
+                        @click="this.submitForm()">
+                        <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_SEARCH', true);?></button>
+                </div>
             </div>
         </div>
     `

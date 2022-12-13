@@ -33,6 +33,21 @@
     background: #6c757d;
     color:#fff;
 }
+.bookingForm  .tb-plugin-form-row.tb-plugin-error {
+  background: #f8f9fa;
+  padding: 10px;
+  border-top: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  font-size: .8rem;
+  display:grid;
+}
+.bookingForm .tb-plugin-form-row.tb-plugin-error .tb-close{
+    justify-self: end;
+    font-size: 1rem;
+    color: #000;
+    opacity: 1;
+    cursor: pointer;
+}
 @media (max-width: 768px) {
     .bookingForm .row-inline {
         margin:5px 0px;
