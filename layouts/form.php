@@ -27,13 +27,14 @@ const TbSearchForm = {
         return {
             restaurant: {
                 id: this.rid,
-                params: {}
+                params: {},
+                hours: [],
             },
             form: {
                 restaurants: [],
                 date: '',
-                starthour: 0,
-                endhour: 0,
+                starthour: '',
+                endhour: '',
                 places: 0
             },
             restrictedDays: [],
@@ -49,6 +50,29 @@ const TbSearchForm = {
                 + id + '&' + JoomlaToken + '=1'
             ).then(r => r.json())
             .then(r => { this.restaurant = r })
+            this.form.date = '';
+            this.form.starthour = 0;
+            this.form.endhour = 0;
+            this.form.places = '';
+            this.restaurant.hours = [];
+        },
+        getRestaurantHours() {
+            const info = {
+                'restaurant': Number(this.restaurant.id),
+                'date': this.form.date.toISOString().split('T')[0]
+            };
+            fetch(
+                JoomlaUri + 'index.php?option=com_tablebooking&task=search.getWorkingHours&' +
+                    'info[date]=' + info.date + '&info[restaurant]=' + info.restaurant + '&' + JoomlaToken + '=1')
+            .then(r => r.json())
+            .then(r => { this.restaurant.hours = this.formatHours(r.hours) })
+        },
+        formatHours(hours) {
+            const keys = Object.keys(hours)
+            const values = Object.values(hours)
+            let modified = []
+            keys.forEach((v,k) => {const i = {}; i.key = v; i.value = values[k]; modified.push(i);})
+            return modified;
         },
         formatDate() {
             const replacements = {
@@ -152,13 +176,14 @@ const TbSearchForm = {
                 <datepicker
                     v-if="this.restaurant.id != 0"
                     v-model="this.form.date"
-                    :enable-time-picker="false"
+                    @open="this.calendarOpen"
+                    @updateMonthYear="this.calendarUpdateMonthYear"
+                    @update:model-value="this.getRestaurantHours()"
                     auto-apply
+                    :enable-time-picker="false"
                     :close-on-auto-apply="true"
                     :min-date="new Date()"
                     :disabled-dates="this.restrictedDays"
-                    @open="this.calendarOpen"
-                    @updateMonthYear="this.calendarUpdateMonthYear"
                     :format="this.formatDate()"
                     :week-start="this.calendarWeekSart()"></datepicker>
             </div>
@@ -167,21 +192,34 @@ const TbSearchForm = {
                 <select
                     v-if="this.restaurant.id != 0"
                     v-model="this.form.starthour">
+                    <option value="0">
+                        <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_FROM_HOUR', false);?>
+                    </option>
+                    <option
+                        v-for="item in this.restaurant.hours"
+                        :key="item.key">{{item.value}}</option>
                 </select>
             </div>
 
             <div class="tb-plugin-form-row-1-3">
                 <select
-                    v-if="this.restaurant.id != 0"
+                    v-if="this.restaurant.id != 0 && Number(this.restaurant.params.booking_length) == 0"
                     v-model="this.form.endhour">
+                    <option value="0">
+                        <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_TO_HOUR', false);?>
+                    </option>
+                    <option
+                        v-for="item in this.restaurant.hours"
+                        :key="item.key">{{item.value}}</option>
                 </select>
             </div>
 
             <div class="tb-plugin-form-row-1-3">
-                <select
+                <input
+                    type="text"
+                    placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_NUMBER_PERSONS', false);?>"
                     v-if="this.restaurant.id != 0"
-                    v-model="this.form.places">
-                </select>
+                    v-model="this.form.places" />
             </div>
 
             <div class="tb-plugin-form-row">
