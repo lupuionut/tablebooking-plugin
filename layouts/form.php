@@ -11,10 +11,11 @@ $restaurant_id = $displayData['id'];
 
 <div id="tb-bookingForm<?php echo $key;?>" class="bookingForm">
     <tb-search-form
-        v-if="idx == 0"
         rkey="<?php echo $key;?>"
-        rid="<?php echo $restaurant_id;?>"></tb-search-form>
+        rid="<?php echo $restaurant_id;?>"
+        @submit="this.searchFormSubmit"></tb-search-form>
 
+    <tb-choose-table v-if="idx == 1"></tb-choose-table>
 </div>
 
 <script type="text/javascript">
@@ -60,16 +61,48 @@ const TbSearchForm = {
                 this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_END_TIME_SELECTED', false);?>';
                 return;
             } else {
-                if (this.restaurant.params.booking_length) {
-                    this.form.endhour = this.form.starthour + this.restaurant.params.booking_length;
+                if (Number(this.restaurant.params.booking_length) != 0) {
+                    this.form.endhour = Number(this.form.starthour) + Number(this.restaurant.params.booking_length);
                 }
             }
             if (!this.form.places) {
                 this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_PLACES_SELECTED', false);?>';
                 return;
             }
+            const formData = {
+                'restaurant': Number(this.restaurant.id),
+                'date': this.form.date.toISOString().split('T')[0],
+                'start': this.findHourKey(this.form.starthour),
+                'end': this.findHourKey(this.form.endhour),
+                'places': this.form.places,
+                'view': 0,
+                'tables': {}
+            };
 
+            if (formData.start > formData.end) {
+                this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_START_HOUR_LATER_END_HOUR', false);?>';
+                return;
+            }
 
+            fetch(
+                JoomlaUri + 'index.php?option=com_tablebooking&task=booking.getTables&'
+                    + 'restaurant=' + formData.restaurant + '&'
+                    + 'date=' + formData.date + '&'
+                    + 'start=' + formData.start + '&'
+                    + 'end=' + formData.end + '&'
+                    + 'places=' + formData.places + '&'
+                    + 'view=0&'
+                    + JoomlaToken + '=1'
+            )
+            .then(r => r.json())
+            .then(r => {
+                if (r.error == null) {
+                    formData.tables = r.tables;
+                    this.$emit('submit', formData);
+                } else {
+                    this.form.error = r.error;
+                }
+            });
         },
         loadRestaurant(id) {
             fetch(
@@ -100,6 +133,13 @@ const TbSearchForm = {
             let modified = []
             keys.forEach((v,k) => {const i = {}; i.key = v; i.value = values[k]; modified.push(i);})
             return modified;
+        },
+        findHourKey(value) {
+            const found = this.restaurant.hours.filter(e => {return e.value == value});
+            if (found.length == 1) {
+                return found[0].key;
+            }
+            return 0;
         },
         formatDate() {
             const replacements = {
@@ -259,16 +299,43 @@ const TbSearchForm = {
         </div>
     `
 };
+
+const TbChooseTable = {
+    data() {
+        return {
+        }
+    },
+    methods: {
+
+    },
+    template: `
+        <div class="tb-choose-table">
+            ccococ
+        </div>
+    `
+};
+
+const TbInputDetails = {
+
+};
 <?php } ?>
 
 Vue.createApp({
     data() {
         return {
             idx: 0,
+            formData: {},
+        }
+    },
+    methods: {
+        searchFormSubmit(data) {
+            console.log(data);
+            this.idx = 1;
         }
     },
     components: {
-        TbSearchForm
+        TbSearchForm,
+        TbChooseTable,
     },
 }).mount('#tb-bookingForm<?php echo $key;?>')
 </script>
