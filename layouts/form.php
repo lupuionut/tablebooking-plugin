@@ -15,7 +15,11 @@ $restaurant_id = $displayData['id'];
         rid="<?php echo $restaurant_id;?>"
         @submit="this.searchFormSubmit"></tb-search-form>
 
-    <tb-choose-table v-if="idx == 1"></tb-choose-table>
+    <tb-choose-table
+        v-if="idx == 1"
+        :data="this.formData"
+        :key="this.formData.timestamp"></tb-choose-table>
+
     <tb-input-details v-if="idx == 2"></tb-input-details>
 </div>
 
@@ -84,7 +88,8 @@ const TbSearchForm = {
                 'date': this.form.date.toISOString().split('T')[0],
                 'start': this.findHourKey(this.form.starthour),
                 'end': this.findHourKey(this.form.endhour),
-                'places': this.form.places
+                'places': this.form.places,
+                'timestamp': new Date().getTime()
             };
 
             if (formData.start > formData.end) {
@@ -311,14 +316,141 @@ const TbSearchForm = {
 const TbChooseTable = {
     data() {
         return {
+            chartDimensions: this.getChartDimensions(),
+            tables: {
+                available: this.getAvailableTables(),
+                selected: this.getSelectedTables()
+            }
         }
     },
     methods: {
+        getChartDimensions() {
+            const chartDimensions = {x: 0, y: 0};
+            if (this.data.tables.total.length > 0) {
+                this.data.tables.total.map(
+                    e => {return e.params}
+                ).map(
+                    e => {
+                        if (e !== "") {
+                            return e.split("x");
+                        } else {
+                            return [0,0];
+                        }
+                    }
+                ).map(
+                    e => {
+                        if (e[0] > chartDimensions.y) {
+                            chartDimensions.y = e[0]
+                        }
+                        if (e[1] > chartDimensions.x) {
+                            chartDimensions.x = e[1];
+                        }
+                    }
+                )
+            }
+            return chartDimensions;
+        },
+        getAvailableTables() {
+            const available = new Map();
+            this.data.tables.total.forEach(t => {
+                if (this.data.tables.booked.indexOf(String(t.id)) === -1) {
+                    available.set(t.id, t);
+                }
+            });
+            return available;
+        },
+        getSelectedTables() {
+            const selected = new Map();
+            const total = this.getAvailableTables();
+            const autoselected = this.data.tables.selected.split(",");
+            if (autoselected.length > 0) {
+                autoselected.forEach(t => {
+                    selected.set(t, total.get(t));
+                })
+            }
+            return selected;
+        },
+        getNonPositionedTables() {
+            return this.data.tables.total.filter(e => {return e.params == "";});
+        },
+        getPositionedTables() {
+            const tables = new Map();
+            this.data.tables.total.filter(e => {return e.params != ""}).map(e => {tables.set(e.params, e);});
+            return tables;
+        },
+        getTableAt(line, column) {
+            const tables = this.getPositionedTables();
+            const coordinates = String((Number(line) - 1)) + 'x' + String(Number(column) - 1);
+            if (!tables.has(coordinates)) {
+                return undefined;
+            }
+            return tables.get(coordinates);
+        },
+        getNumberOfPlaces(table) {
+            if (table == undefined) {
+                return '';
+            }
+            return table.min_places + ' - ' + table.max_places;
+        },
+        getClassForTable(table) {
+            if (table == undefined) {
+                return "tb-cell empty";
+            }
 
+            let clas = "tb-cell";
+            clas += this.tables.available.has(table.id) ? ' available' : ' booked';
+            if (table.shape == 1) {
+                clas += ' circle';
+            } else if (table.shape == 2) {
+                clas += ' rectangle';
+            } else {
+                clas += ' square';
+            }
+            if (this.tables.selected.has(table.id)) {
+                clas += ' selected';
+            }
+            return clas;
+        },
+        chooseTable(event, table) {
+            if (!this.tables.available.has(table.id)) {
+                return;
+            }
+            if (this.tables.selected.has(table.id)) {
+                this.tables.selected.delete(table.id);
+            } else {
+                let total = 0;
+                if (this.data.places < table.min_places) {
+                    return;
+                }
+                this.tables.selected.forEach(t => {total += Number(t.max_places);});
+                if (total < this.data.places) {
+                    this.tables.selected.set(table.id, table);
+                }
+            }
+        },
     },
+    mounted() {
+    },
+    props: ["data", "key"],
     template: `
         <div class="tb-choose-table">
-            ccococ
+            <h3><?php echo JText::_('PLG_CONTENT_TABLEBOOKING_CHOOSE_TABLE', true);?></h3>
+            <div v-for="table in this.getNonPositionedTables()" class="tb-line">
+                <span
+                    :class="this.getClassForTable(table)"
+                    @click="this.chooseTable($event, table)">
+                    <i>{{ getNumberOfPlaces(table) }}</i>
+                </span>
+            </div>
+            <div v-for="line in Number(this.chartDimensions.y) + 1" class="tb-line">
+                <div v-for="column in Number(this.chartDimensions.x) + 1" class="tb-dropzone">
+                    <span
+                        :class="this.getClassForTable(this.getTableAt(line, column))"
+                        @click="this.chooseTable($event, this.getTableAt(line, column))">
+                        <i>{{ getNumberOfPlaces(this.getTableAt(line, column)) }}</i>
+                    </span>
+                </div>
+            </div>
         </div>
     `
 };

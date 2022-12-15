@@ -82,7 +82,7 @@ class PlgContentTablebooking extends JPlugin
         Factory::getDocument()->addScript('https://unpkg.com/vue@3/dist/vue.global.js');
         Factory::getDocument()->addScript('https://unpkg.com/@vuepic/vue-datepicker@latest');
         Factory::getDocument()->addStyleSheet('https://unpkg.com/@vuepic/vue-datepicker@latest/dist/main.css"');
-        Factory::getDocument()->addStyleSheet(Uri::root() . 'plugins/content/tablebooking/tablebooking.css');
+        Factory::getDocument()->addStyleSheet(Uri::root() . 'plugins/content/tablebooking/tablebooking.css?t=' . time());
         $isNew = self::$isNewInstance;
         self::$isNewInstance = false;
         return LayoutHelper::render(

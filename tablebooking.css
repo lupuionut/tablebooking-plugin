@@ -48,6 +48,50 @@
     opacity: 1;
     cursor: pointer;
 }
+.tb-choose-table {
+    display:flex;
+    flex-direction: column;
+}
+.tb-line {
+    display: flex;
+    flex-direction: row;
+}
+.tb-cell {
+    width: 50px;
+    height: 50px;
+    display: block;
+    cursor:pointer;
+    position: relative;
+}
+.tb-cell.circle.available, .tb-cell.rectangle.available, .tb-cell.square.available {
+    background: #005e8d;
+    border:1px solid #fff;
+}
+.tb-cell.circle.booked, .tb-cell.rectangle.booked, .tb-cell.square.booked {
+    background: #eee;
+}
+.tb-cell.circle {
+    border-radius:50%;
+}
+.tb-cell.rectangle {
+    height: 35px;
+}
+.tb-cell.selected:after {
+    content:'\2705';
+    position: absolute;
+    right: 0;
+}
+.tb-cell i {
+    color: #fff;
+    font-style: normal;
+    position: absolute;
+    bottom: 0;
+    font-size: 8px;
+}
+.tb-choose-table h3 {
+  font-size: 1rem;
+  border-bottom: 1px solid #eee;
+}
 @media (max-width: 768px) {
     .bookingForm .row-inline {
         margin:5px 0px;
