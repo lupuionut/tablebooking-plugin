@@ -13,8 +13,8 @@ $restaurant_id = $displayData['id'];
     <tb-search-form
         rkey="<?php echo $key;?>"
         rid="<?php echo $restaurant_id;?>"
-        @submit="this.searchFormSubmit"
-        :form="this.form"></tb-search-form>
+        :form="this.form"
+        @submit="this.searchFormSubmit"></tb-search-form>
 
     <tb-choose-table
         v-if="idx == 1"
@@ -483,7 +483,7 @@ const TbChooseTable = {
             <button
                 type="button"
                 class="full-width"
-                @click="this.submitForm()">
+                @click="this.submitForm">
                 <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_CONTINUE', true);?>
             </button>
         </div>
@@ -503,7 +503,7 @@ const TbInputDetails = {
         }
     },
     methods: {
-        submitForm() {
+        submitForm(event) {
             if (this.details.name == '') {
                 this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_COMPLETE_NAME", true);?>';
                 return;
@@ -533,6 +533,8 @@ const TbInputDetails = {
             formData.append('jform[phone]', this.details.phone);
             formData.append('jform[comments]', this.details.comments);
 
+            event.target.disabled = true;
+
             fetch(
                 JoomlaUri + 'index.php?option=com_tablebooking&task=booking.saveAjax&' + JoomlaToken + '=1',
                 {
@@ -542,12 +544,17 @@ const TbInputDetails = {
             )
             .then(r => r.json())
             .then(r => {
+                event.target.disabled = false;
                 if (r.success == 1) {
                     this.$emit("submit");
                 } else {
                     this.error = r.errors;
                 }
-            });
+            })
+            .catch(e => {
+                event.target.disabled = false;
+                this.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_UNEXPECTED_ERROR', true);?>';
+            })
         }
     },
     props: ["data", "key"],
@@ -592,7 +599,7 @@ const TbInputDetails = {
                 <button
                     type="button"
                     class="full-width"
-                    @click="this.submitForm()">
+                    @click="this.submitForm($event)">
                     <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_FINISH', true);?>
                 </button>
             </div>
