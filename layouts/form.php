@@ -13,14 +13,23 @@ $restaurant_id = $displayData['id'];
     <tb-search-form
         rkey="<?php echo $key;?>"
         rid="<?php echo $restaurant_id;?>"
-        @submit="this.searchFormSubmit"></tb-search-form>
+        @submit="this.searchFormSubmit"
+        :form="this.form"></tb-search-form>
 
     <tb-choose-table
         v-if="idx == 1"
         :data="this.formData"
-        :key="this.formData.timestamp"></tb-choose-table>
+        :key="this.formData.timestamp"
+        @submit="this.placessubmit"></tb-choose-table>
 
-    <tb-input-details v-if="idx == 2"></tb-input-details>
+    <tb-input-details
+        v-if="idx == 2"
+        :data="this.formData"
+        :key="this.formData.timestamp"
+        @submit="this.finish"></tb-input-details>
+
+    <tb-finish-page
+        v-if="idx == 3"></tb-finish-page>
 </div>
 
 <script type="text/javascript">
@@ -35,14 +44,6 @@ const TbSearchForm = {
                 id: this.rid,
                 params: {},
                 hours: [],
-            },
-            form: {
-                restaurants: [],
-                date: '',
-                starthour: '',
-                endhour: '',
-                places: 0,
-                error: ''
             },
             restrictedDays: [],
         }
@@ -221,7 +222,10 @@ const TbSearchForm = {
                 return this.restaurant.params.startcal;
             }
             return 1;
-        }
+        },
+        reset() {
+            console.log('reset');
+        },
     },
     mounted() {
         if (this.restaurant.id == 0) {
@@ -232,7 +236,7 @@ const TbSearchForm = {
             this.loadRestaurant(this.restaurant.id);
         }
     },
-    props: ["rid", "rkey"],
+    props: ["rid", "rkey", "form"],
     components: {
         Datepicker: VueDatePicker
     },
@@ -320,7 +324,8 @@ const TbChooseTable = {
             tables: {
                 available: this.getAvailableTables(),
                 selected: this.getSelectedTables()
-            }
+            },
+            error: ''
         }
     },
     methods: {
@@ -428,13 +433,35 @@ const TbChooseTable = {
                 }
             }
         },
+        submitForm() {
+            if (this.tables.selected.size == 0) {
+                this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_NO_TABLE_SELECTED", true) ;?>';
+                return;
+            }
+
+            let total = 0;
+            let total_elements = [];
+            this.tables.selected.forEach(t => {total += Number(t.max_places); total_elements.push(t.id)});
+
+            if (total < this.data.places) {
+                this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_SELECTION_SMALLER_PLACES", true) ;?>';
+                return;
+            }
+
+            this.data.tables.selected = total_elements.join(',');
+            this.$emit("submit", JSON.stringify(this.data));
+        }
     },
-    mounted() {
-    },
+    emits: ["submit"],
     props: ["data", "key"],
     template: `
         <div class="tb-choose-table">
             <h3><?php echo JText::_('PLG_CONTENT_TABLEBOOKING_CHOOSE_TABLE', true);?></h3>
+            <div class="tb-plugin-form-row tb-plugin-error" v-if="this.error">
+                <span class="tb-close" @click="this.error = ''">X</span>
+                {{error}}
+            </div>
+
             <div v-for="table in this.getNonPositionedTables()" class="tb-line">
                 <span
                     :class="this.getClassForTable(table)"
@@ -452,19 +479,135 @@ const TbChooseTable = {
                 </div>
             </div>
         </div>
+        <div class="tb-plugin-form-row">
+            <button
+                type="button"
+                class="full-width"
+                @click="this.submitForm()">
+                <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_CONTINUE', true);?>
+            </button>
+        </div>
     `
 };
 
 const TbInputDetails = {
     data() {
         return {
+            details: {
+                name: '',
+                email: '',
+                phone: '',
+                comments: ''
+            },
+            error: ''
         }
     },
     methods: {
+        submitForm() {
+            if (this.details.name == '') {
+                this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_COMPLETE_NAME", true);?>';
+                return;
+            }
+            if (this.details.email == '') {
+                this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_COMPLETE_EMAIL", true);?>';
+                return;
+            }
+            if (this.data.restaurant.params.form_display_phone == 1 && this.details.phone == '') {
+                this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_COMPLETE_PHONE", true);?>';
+                return;
+            }
+            if (this.data.restaurant.params.form_display_comments == 1 && this.details.comments == '') {
+                this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_COMPLETE_COMMENTS", true);?>';
+                return;
+            }
 
+            const formData = new FormData()
+            formData.append('jform[restaurant]', this.data.restaurant.id);
+            formData.append('jform[bookdate]', this.data.date);
+            formData.append('jform[bookstart]', this.data.start);
+            formData.append('jform[bookend]', this.data.end);
+            formData.append('jform[places]', this.data.places);
+            formData.append('jform[table]', this.data.tables.selected);
+            formData.append('jform[name]', this.details.name);
+            formData.append('jform[email]', this.details.email);
+            formData.append('jform[phone]', this.details.phone);
+            formData.append('jform[comments]', this.details.comments);
+
+            fetch(
+                JoomlaUri + 'index.php?option=com_tablebooking&task=booking.saveAjax&' + JoomlaToken + '=1',
+                {
+                    method: 'POST',
+                    body: formData
+                }
+            )
+            .then(r => r.json())
+            .then(r => {
+                if (r.success == 1) {
+                    this.$emit("submit");
+                } else {
+                    this.error = r.errors;
+                }
+            });
+        }
+    },
+    props: ["data", "key"],
+    emits: ["submit"],
+    template: `
+        <div class="tb-input-details">
+            <div class="tb-plugin-form-row tb-plugin-error" v-if="this.error">
+                <span class="tb-close" @click="this.error = ''">X</span>
+                {{error}}
+            </div>
+
+            <div class="tb-plugin-form-row">
+                <input
+                    type="text"
+                    placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_NAME', true);?>"
+                    v-model="this.details.name" />
+            </div>
+
+            <div class="tb-plugin-form-row">
+                <input
+                    type="text"
+                    placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_EMAIL', true);?>"
+                    v-model="this.details.email" />
+            </div>
+
+            <div class="tb-plugin-form-row">
+                <input
+                    type="text"
+                    placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_PHONE', true);?>"
+                    v-if="this.data.restaurant.params.form_display_phone != 2"
+                    v-model="this.details.phone" />
+            </div>
+
+            <div class="tb-plugin-form-row">
+                <textarea
+                    v-if="this.data.restaurant.params.form_display_comments != 2"
+                    v-model="this.details.comments"
+                    placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_COMMENTS', true);?>"></textarea>
+            </div>
+
+            <div class="tb-plugin-form-row">
+                <button
+                    type="button"
+                    class="full-width"
+                    @click="this.submitForm()">
+                    <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_FINISH', true);?>
+                </button>
+            </div>
+        </div>
+    `
+};
+
+const TbFinishPage = {
+    data() {
+        return {
+
+        }
     },
     template: `
-        <div class="tb-input-details">Input details</div>
+        <div class="tb-plugin-form-row finish"><?php echo JText::_('PLG_CONTENT_TABLEBOOKING_THANK_YOU', true);?></div>
     `
 };
 <?php } ?>
@@ -474,6 +617,7 @@ Vue.createApp({
         return {
             idx: 0,
             formData: {},
+            form: this.initForm()
         }
     },
     methods: {
@@ -484,12 +628,32 @@ Vue.createApp({
             } else {
                 this.idx = 2;
             }
+        },
+        placessubmit(e) {
+            this.formData = JSON.parse(e);
+            this.formData.timestamp = new Date().getTime();
+            this.idx = 2;
+        },
+        finish(e) {
+            this.form = this.initForm();
+            this.idx = 3;
+        },
+        initForm() {
+            return {
+                restaurants: [],
+                date: '',
+                starthour: '',
+                endhour: '',
+                places: '',
+                error: ''
+            };
         }
     },
     components: {
         TbSearchForm,
         TbChooseTable,
-        TbInputDetails
+        TbInputDetails,
+        TbFinishPage
     },
 }).mount('#tb-bookingForm<?php echo $key;?>')
 </script>

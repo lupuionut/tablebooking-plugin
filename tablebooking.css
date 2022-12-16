@@ -7,13 +7,16 @@
     flex-direction: row;
     margin-bottom:5px;
 }
-.bookingForm .tb-plugin-form-row select, .tb-plugin-form-row input[type="text"] {
-    width: 90%;
-    padding: 6px 12px;
+.bookingForm .tb-plugin-form-row select,
+.tb-plugin-form-row input[type="text"],
+.tb-plugin-form-row textarea {
+    padding: 5px;
     line-height: 1.5rem;
     height: auto;
     font-size: 1rem;
     margin: 0;
+    flex:auto;
+    width: 100%;
 }
 .bookingForm .row-inline {
     flex: fit-content;
@@ -51,6 +54,8 @@
 .tb-choose-table {
     display:flex;
     flex-direction: column;
+    margin:15px 0;
+    padding:5px;
 }
 .tb-line {
     display: flex;
@@ -59,9 +64,10 @@
 .tb-cell {
     width: 50px;
     height: 50px;
-    display: block;
+    display: flex;
     cursor:pointer;
     position: relative;
+    justify-content: center;
 }
 .tb-cell.circle.available, .tb-cell.rectangle.available, .tb-cell.square.available {
     background: #005e8d;
@@ -91,6 +97,14 @@
 .tb-choose-table h3 {
   font-size: 1rem;
   border-bottom: 1px solid #eee;
+}
+.full-width{
+    width: 100% !important;
+}
+.tb-plugin-form-row.finish {
+    font-size: 1.5rem;
+    padding: 20px;
+    justify-content: center;
 }
 @media (max-width: 768px) {
     .bookingForm .row-inline {
