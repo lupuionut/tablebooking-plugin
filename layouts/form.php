@@ -287,6 +287,7 @@ const TbSearchForm = {
                     @updateMonthYear="this.calendarUpdateMonthYear"
                     @update:model-value="this.getRestaurantHours()"
                     auto-apply
+                    placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_CHOOSE_DATE', false);?>"
                     :enable-time-picker="false"
                     :close-on-auto-apply="true"
                     :min-date="new Date()"
