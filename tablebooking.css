@@ -23,6 +23,11 @@
     display: flex;
     margin:0px 2px;
 }
+.bookingForm .row-inline label {
+    display: block;
+    margin-bottom: 5px;
+    margin-right: 10px;
+}
 .bookingForm button {
     background: #eeefff;
     color:#313942;

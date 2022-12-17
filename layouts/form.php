@@ -497,7 +497,8 @@ const TbInputDetails = {
                 name: '',
                 email: '',
                 phone: '',
-                comments: ''
+                comments: '',
+                gdpr: false
             },
             error: ''
         }
@@ -520,6 +521,10 @@ const TbInputDetails = {
                 this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_COMPLETE_COMMENTS", true);?>';
                 return;
             }
+            if (this.data.restaurant.params.gdpr_enable == 1 && this.details.gdpr == false) {
+                this.error = '<?php echo JText::_("PLG_CONTENT_TABLEBOOKING_ERROR_AGREE_TERMS", true);?>';
+                return;
+            }
 
             const formData = new FormData()
             formData.append('jform[restaurant]', this.data.restaurant.id);
@@ -532,6 +537,7 @@ const TbInputDetails = {
             formData.append('jform[email]', this.details.email);
             formData.append('jform[phone]', this.details.phone);
             formData.append('jform[comments]', this.details.comments);
+            formData.append('jform[gdpr]', Number(this.details.gdpr));
 
             event.target.disabled = true;
 
@@ -593,6 +599,20 @@ const TbInputDetails = {
                     v-if="this.data.restaurant.params.form_display_comments != 2"
                     v-model="this.details.comments"
                     placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_COMMENTS', true);?>"></textarea>
+            </div>
+
+            <div
+                class="tb-plugin-form-row"
+                v-if="this.data.restaurant.params.gdpr_enable != 0">
+                <div class="row-inline">
+                    <label>
+                        <input
+                            type="checkbox"
+                            @click="this.gdpr = !this.gdpr"
+                            v-model="this.details.gdpr" />
+                    </label>
+                    <div v-html="this.data.restaurant.params.gdpr_text"></div>
+                </div>
             </div>
 
             <div class="tb-plugin-form-row">
