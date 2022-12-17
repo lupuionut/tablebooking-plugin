@@ -111,6 +111,15 @@
     padding: 20px;
     justify-content: center;
 }
+span.tb-recommend {
+    padding: 5px;
+    background: #fff;
+    margin: 0px 5px;
+    border: 1px solid #eee;
+}
+.tb-plugin-form-row.tb-recommend {
+    flex-wrap: wrap;
+}
 @media (max-width: 768px) {
     .bookingForm .row-inline {
         margin:5px 0px;
@@ -125,5 +134,8 @@
     }
     .bookingForm button {
         line-height: 2rem;
+    }
+    .bookingForm .tb-plugin-form-row.tb-recommend {
+        flex-direction: row;
     }
 }

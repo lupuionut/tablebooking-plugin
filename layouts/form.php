@@ -46,6 +46,9 @@ const TbSearchForm = {
                 hours: [],
             },
             restrictedDays: [],
+            tables: {
+                recommend_hours: []
+            }
         }
     },
     methods: {
@@ -114,6 +117,7 @@ const TbSearchForm = {
                     formData.restaurant = this.restaurant;
                     this.$emit('submit', JSON.stringify(formData));
                 } else {
+                    this.tables = r.ok;
                     this.form.error = r.error;
                 }
             });
@@ -245,7 +249,22 @@ const TbSearchForm = {
             <div class="tb-plugin-form-row tb-plugin-error" v-if="this.form.error">
                 <span class="tb-close" @click="this.form.error = ''">X</span>
                 {{form.error}}
+                <div class="tb-plugin-form-row"
+                    v-if="this.tables.recommend_hours.length > 0">
+                    <label class="tb-recommend">
+                        <?php echo JText::_('PLG_CONTENT_TABLEBOOKING_RECOMMEND_HOURS', true) ;?>
+                    </label>
+                </div>
+                <div class="tb-plugin-form-row tb-recommend"
+                    v-if="this.tables.recommend_hours.length > 0">
+                    <span
+                        class="tb-recommend"
+                        v-for="hour in this.tables.recommend_hours">
+                        {{hour.val}}
+                    </span>
+                </div>
             </div>
+
             <div class="tb-plugin-form-row">
                 <select
                     v-if="this.rid == 0"
