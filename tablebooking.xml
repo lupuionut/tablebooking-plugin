@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.1" type="plugin" group="content" method="upgrade">
-	<name>plg_content_tablebooking</name>
-	<author>Ionut Lupu</author>
-	<creationDate>December 2022</creationDate>
-	<copyright>Ionut Lupu</copyright>
-	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<authorEmail>mail@ionutlupu.work</authorEmail>
-	<authorUrl>www.ionutlupu.work</authorUrl>
-	<version>1.0.0</version>
-	<description></description>
-	<files>
-		<filename plugin="tablebooking">tablebooking.php</filename>
-	</files>
-	<languages>
-		<language tag="en-GB">language/en-GB/en-GB.plg_content_tablebooking.sys.ini</language>
-		<language tag="en-GB">language/en-GB/en-GB.plg_content_tablebooking.ini</language>
-	</languages>
-	<config>
-	</config>
+    <name>plg_content_tablebooking</name>
+    <author>Ionut Lupu</author>
+    <creationDate>December 2022</creationDate>
+    <copyright>Ionut Lupu</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>mail@ionutlupu.work</authorEmail>
+    <authorUrl>ionutlupu.work</authorUrl>
+    <version>1.0.0</version>
+    <description></description>
+    <files>
+        <filename plugin="tablebooking">tablebooking.php</filename>
+    </files>
+    <languages>
+        <language tag="en-GB">language/en-GB/en-GB.plg_content_tablebooking.sys.ini</language>
+        <language tag="en-GB">language/en-GB/en-GB.plg_content_tablebooking.ini</language>
+    </languages>
+    <config>
+    </config>
 </extension>
