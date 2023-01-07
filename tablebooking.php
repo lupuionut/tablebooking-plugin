@@ -4,6 +4,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Plugin\PluginHelper;
 
 defined('_JEXEC') or die;
 
@@ -85,7 +86,11 @@ class PlgContentTablebooking extends JPlugin
         Factory::getDocument()->addStyleSheet(Uri::root() . 'plugins/content/tablebooking/tablebooking.css?t=' . time());
         $isNew = self::$isNewInstance;
         self::$isNewInstance = false;
-        return LayoutHelper::render(
-            'form', array('key' => $key, 'id' => $id, 'isNew' => $isNew), __DIR__ . '/layouts');
+        $path = PluginHelper::getLayoutPath('content', 'tablebooking', 'form');
+        $displayData = array('key' => $key, 'id' => $id, 'isNew' => $isNew);
+        ob_start();
+        include $path;
+        $data = ob_get_clean();
+        return $data;
     }
 }

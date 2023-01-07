@@ -11,7 +11,7 @@
     <description></description>
     <files>
         <folder>language</folder>
-        <folder>layouts</folder>
+        <folder>tmpl</folder>
         <filename>tablebooking.css</filename>
         <filename plugin="tablebooking">tablebooking.php</filename>
     </files>
