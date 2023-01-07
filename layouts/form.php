@@ -69,10 +69,6 @@ const TbSearchForm = {
             if (!this.restaurant.params.booking_length && !this.form.endhour) {
                 this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_END_TIME_SELECTED', false);?>';
                 return;
-            } else {
-                if (Number(this.restaurant.params.booking_length) != 0) {
-                    this.form.endhour = Number(this.form.starthour) + Number(this.restaurant.params.booking_length);
-                }
             }
             if (this.form.places == 0) {
                 this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_NO_PLACES_SELECTED', false);?>';
@@ -87,6 +83,7 @@ const TbSearchForm = {
                     return;
                 }
             }
+
             const formData = {
                 'restaurant': Number(this.restaurant.id),
                 'date': this.form.date.toISOString().split('T')[0],
@@ -95,6 +92,10 @@ const TbSearchForm = {
                 'places': this.form.places,
                 'timestamp': new Date().getTime()
             };
+
+            if (Number(this.restaurant.params.booking_length) != 0) {
+                formData.end = formData.start + Number(this.restaurant.params.booking_length);
+            }
 
             if (formData.start > formData.end) {
                 this.form.error = '<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_ERROR_START_HOUR_LATER_END_HOUR', false);?>';
