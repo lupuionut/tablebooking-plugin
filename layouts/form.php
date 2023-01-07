@@ -563,7 +563,7 @@ const TbInputDetails = {
             event.target.disabled = true;
 
             fetch(
-                JoomlaUri + 'index.php?option=com_tablebooking&task=booking.saveAjax&' + JoomlaToken + '=1',
+                JoomlaUri + 'index.php?option=com_tablebooking&task=booking.saveAjax&location=client&' + JoomlaToken + '=1',
                 {
                     method: 'POST',
                     body: formData
