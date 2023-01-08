@@ -22,6 +22,8 @@ class PlgContentTablebooking extends JPlugin
     */
     public function onContentPrepare($context, &$row, &$params, $page = 0) {
 
+        JLoader::register('TbRestaurant', JPATH_CONFIGURATION . '/components/com_tablebooking/helpers/tbrestaurant.php');
+
         // Don't run this plugin when the content is being indexed
         if ($context === 'com_finder.indexer') {
             return true;
@@ -37,13 +39,19 @@ class PlgContentTablebooking extends JPlugin
         // generate a booking form for each found instance on the page
         foreach ($ids as $key => $id) {
             if ($id == -1) {
-                $replacement = $this->generateForm($key, 0);
+                //$replacement = $this->generateForm($key, 0);
+                $replacement = '';
                 $row->text = preg_replace('#{{tablebooking}}#', $replacement, $row->text, 1);
             } elseif ($id == 0) {
-                $replacement = $this->generateForm($key, 0);
+                //$replacement = $this->generateForm($key, 0);
+                $replacement = '';
                 $row->text = preg_replace('#{{tablebooking id=0}}#', $replacement, $row->text, 1);
             } else {
-                $replacement = $this->generateForm($key, $id);
+                if ($this->isValidRestaurant($id)) {
+                    $replacement = $this->generateForm($key, $id);
+                } else {
+                    $replacement = '';
+                }
                 $row->text = preg_replace('#{{tablebooking id=[0-9]{1,}}}#', $replacement, $row->text, 1);
             }
         }
@@ -91,5 +99,11 @@ class PlgContentTablebooking extends JPlugin
         include $path;
         $data = ob_get_clean();
         return $data;
+    }
+
+
+    protected function isValidRestaurant($id) {
+        $restaurant = TbRestaurant::getInstance($id);
+        return $restaurant->id == 0 ? false : true;
     }
 }
