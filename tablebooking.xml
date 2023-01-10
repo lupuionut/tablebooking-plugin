@@ -7,13 +7,12 @@
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>mail@ionutlupu.work</authorEmail>
     <authorUrl>ionutlupu.work</authorUrl>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <description></description>
     <files>
         <folder>assets</folder>
         <folder>language</folder>
         <folder>tmpl</folder>
-        <filename>tablebooking.css</filename>
         <filename plugin="tablebooking">tablebooking.php</filename>
     </files>
     <languages>
