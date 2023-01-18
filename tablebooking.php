@@ -118,7 +118,7 @@ class PlgContentTablebooking extends JPlugin
     protected function generateForm($key, $arguments) {
 
         Factory::getDocument()->addScript(Uri::root() . 'plugins/content/tablebooking/assets/vue.global.prod.js');
-        Factory::getDocument()->addScript(Uri::root() . 'plugins/content/tablebooking/assets/vue-datepicker@latest');
+        Factory::getDocument()->addScript(Uri::root() . 'plugins/content/tablebooking/assets/vue-datepicker.js');
         Factory::getDocument()->addStyleSheet(Uri::root() . 'plugins/content/tablebooking/assets/main.css');
         Factory::getDocument()->addStyleSheet(Uri::root() . 'plugins/content/tablebooking/assets/tablebooking.css?t=' . time());
         $isNew = self::$isNewInstance;
