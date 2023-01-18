@@ -34,43 +34,73 @@ class PlgContentTablebooking extends JPlugin
             return true;
         }
 
-        $ids = $this->extractIds($row->text);
+        $expressions = $this->getExpressions($row->text);
 
-        // generate a booking form for each found instance on the page
-        foreach ($ids as $key => $id) {
-            if ($id == -1) {
-                //$replacement = $this->generateForm($key, 0);
-                $replacement = '';
-                $row->text = preg_replace('#{{tablebooking}}#', $replacement, $row->text, 1);
-            } elseif ($id == 0) {
-                //$replacement = $this->generateForm($key, 0);
-                $replacement = '';
-                $row->text = preg_replace('#{{tablebooking id=0}}#', $replacement, $row->text, 1);
+        foreach ($expressions as $key => $expression) {
+
+            // init the default arguments for the booking form
+            $arguments = array("id" => 0, "lang" => "en");
+            $this->parseExpression($expression, $arguments);
+
+            if ($this->isValidRestaurant($arguments['id'])) {
+                $replacement = $this->generateForm($key, $arguments);
             } else {
-                if ($this->isValidRestaurant($id)) {
-                    $replacement = $this->generateForm($key, $id);
-                } else {
-                    $replacement = '';
-                }
-                $row->text = preg_replace('#{{tablebooking id=[0-9]{1,}}}#', $replacement, $row->text, 1);
+                $replacement = '';
             }
+            $row->text = preg_replace('#{{tablebooking .*?}}#', $replacement, $row->text, 1);
         }
 
         return true;
     }
 
 
-    // returns an array with all restaurants id for which we should generate
-    // the booking form
-    protected function extractIds($content) {
-
-        $ids = array();
-        $regex = '#\{\{tablebooking(?=( id=([0-9]{1,})\}\})|\}\})#';
+    protected function getExpressions($content) {
+        $regex = '#{{tablebooking .*?}}#';
         preg_match_all($regex, $content, $matches);
-        if (count($matches) == 3) {
-            return array_map(function($el){return $el != '' ? $el : -1;}, $matches[2]);
+        return $matches[0];
+    }
+
+
+    /*
+    * Parse a string {{tablebooking x=22 y=uk p=again}} into a corresponding array
+    * ["x": "22", "y": "uk", "p": "again"]
+    * This allows adding to the plugin a variable number of arguments
+    */
+    protected function parseExpression($expression, &$arguments) {
+        $substring = trim(substr($expression, 14, -2));
+        $i = 0;
+        $max = strlen($substring);
+        $key = '';
+        $value = '';
+        $direction = 'left';
+        while ($i <= $max) {
+            if ($i == $max) {
+                $arguments[$key] = $value;
+                break;
+            }
+            if ($substring[$i] == "=") {
+                $arguments[$key] = "";
+                $direction = 'right';
+                $i++;
+                continue;
+            }
+            if ((ord($substring[$i]) >= 97 && ord($substring[$i]) <= 122) ||
+                (ord($substring[$i]) >= 48 && ord($substring[$i])<= 57)) {
+                if ($direction == 'left') {
+                    $key .= $substring[$i];
+                } else {
+                    $value .= $substring[$i];
+                }
+            } else {
+                if ($value != '') {
+                    $arguments[$key] = $value;
+                }
+                $direction = 'left';
+                $key = '';
+                $value = '';
+            }
+            $i++;
         }
-        return $ids;
     }
 
 
@@ -85,7 +115,7 @@ class PlgContentTablebooking extends JPlugin
     }
 
 
-    protected function generateForm($key, $id) {
+    protected function generateForm($key, $arguments) {
 
         Factory::getDocument()->addScript(Uri::root() . 'plugins/content/tablebooking/assets/vue.global.prod.js');
         Factory::getDocument()->addScript(Uri::root() . 'plugins/content/tablebooking/assets/vue-datepicker@latest');
@@ -94,7 +124,7 @@ class PlgContentTablebooking extends JPlugin
         $isNew = self::$isNewInstance;
         self::$isNewInstance = false;
         $path = PluginHelper::getLayoutPath('content', 'tablebooking', 'form');
-        $displayData = array('key' => $key, 'id' => $id, 'isNew' => $isNew);
+        $displayData = array('key' => $key, 'id' => $arguments['id'], 'isNew' => $isNew, 'lang' => $arguments['lang']);
         ob_start();
         include $path;
         $data = ob_get_clean();
@@ -107,3 +137,4 @@ class PlgContentTablebooking extends JPlugin
         return $restaurant->id == 0 ? false : true;
     }
 }
+

@@ -7,12 +7,14 @@ defined('_JEXEC') or die;
 
 $key = $displayData['key'];
 $restaurant_id = $displayData['id'];
+$locale = $displayData['lang'];
 ?>
 
 <div id="tb-bookingForm<?php echo $key;?>" class="bookingForm">
     <tb-search-form
         rkey="<?php echo $key;?>"
         rid="<?php echo $restaurant_id;?>"
+        locale="<?php echo $locale; ?>"
         :form="this.form"
         @submit="this.searchFormSubmit"></tb-search-form>
 
@@ -241,7 +243,7 @@ const TbSearchForm = {
             this.loadRestaurant(this.restaurant.id);
         }
     },
-    props: ["rid", "rkey", "form"],
+    props: ["rid", "rkey", "locale", "form"],
     components: {
         Datepicker: VueDatePicker
     },
@@ -282,6 +284,7 @@ const TbSearchForm = {
 
             <div class="tb-plugin-form-row">
                 <datepicker
+                    :locale="this.locale"
                     v-if="this.restaurant.id != 0"
                     v-model="this.form.date"
                     @open="this.calendarOpen"
@@ -705,3 +708,4 @@ Vue.createApp({
     },
 }).mount('#tb-bookingForm<?php echo $key;?>')
 </script>
+
