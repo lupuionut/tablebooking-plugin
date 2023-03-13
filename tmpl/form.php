@@ -283,21 +283,23 @@ const TbSearchForm = {
             </div>
 
             <div class="tb-plugin-form-row">
-                <datepicker
-                    :locale="this.locale"
-                    v-if="this.restaurant.id != 0"
-                    v-model="this.form.date"
-                    @open="this.calendarOpen"
-                    @updateMonthYear="this.calendarUpdateMonthYear"
-                    @update:model-value="this.getRestaurantHours()"
-                    auto-apply
-                    placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_CHOOSE_DATE', false);?>"
-                    :enable-time-picker="false"
-                    :close-on-auto-apply="true"
-                    :min-date="new Date()"
-                    :disabled-dates="this.restrictedDays"
-                    :format="this.formatDate()"
-                    :week-start="this.calendarWeekSart()"></datepicker>
+                <div class="row-inline">
+                    <datepicker
+                        :locale="this.locale"
+                        v-if="this.restaurant.id != 0"
+                        v-model="this.form.date"
+                        @open="this.calendarOpen"
+                        @updateMonthYear="this.calendarUpdateMonthYear"
+                        @update:model-value="this.getRestaurantHours()"
+                        auto-apply
+                        placeholder="<?php echo JText::_('PLG_CONTENT_TABLEBOOKING_CHOOSE_DATE', false);?>"
+                        :enable-time-picker="false"
+                        :close-on-auto-apply="true"
+                        :min-date="new Date()"
+                        :disabled-dates="this.restrictedDays"
+                        :format="this.formatDate()"
+                        :week-start="this.calendarWeekSart()"></datepicker>
+                </div>
 
                 <div class="row-inline" v-if="this.restaurant.id != 0">
                     <select

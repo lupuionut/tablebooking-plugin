@@ -2,12 +2,12 @@
 <extension version="3.1" type="plugin" group="content" method="upgrade">
     <name>plg_content_tablebooking</name>
     <author>Ionut Lupu</author>
-    <creationDate>January 2023</creationDate>
+    <creationDate>March 2023</creationDate>
     <copyright>Ionut Lupu</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>mail@ionutlupu.work</authorEmail>
     <authorUrl>ionutlupu.work</authorUrl>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <description></description>
     <files>
         <folder>assets</folder>
