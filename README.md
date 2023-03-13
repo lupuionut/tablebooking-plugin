@@ -9,3 +9,4 @@ This plugin will generate a reservation form inside an article.
 
 ### Notes
 This plugin is compatible with Joomla 3.
+![demo](https://user-images.githubusercontent.com/30523683/224731974-a32df1af-60d1-4aac-bbea-5e240033713b.gif)
